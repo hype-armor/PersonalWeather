@@ -1,5 +1,6 @@
 # PersonalWeather
 [![CodeFactor](https://www.codefactor.io/repository/github/hype-armor/personalweather/badge)](https://www.codefactor.io/repository/github/hype-armor/personalweather)
+
 Project goals.
 1. Gathers weather data from NWS
 2. Lets users enter weather personal preferences.
