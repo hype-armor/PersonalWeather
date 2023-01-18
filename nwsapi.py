@@ -2,11 +2,13 @@
 import requests
 import nwsclass
 import ziptolatlong 
+import UserPreferences
 
 class nws(object):
     lat = ''
     lng = ''
     json = ''
+    userperfs = UserPreferences.UserPreferences()
 
     def __init__(self, zipcode):
         # get the latitude and longitude for the zip code
@@ -20,6 +22,8 @@ class nws(object):
 
         # Parse the JSON response
         self.json = response.json()
+
+        
 
     def GetForecast(self):
         # Get the forecast URL from the response
@@ -72,4 +76,4 @@ class nws(object):
         for hourly_forecast in hourly_forecast_data['properties']['periods'][0:3]:
             # parse the forecast date and time
             forecast_date = hourly_forecast['startTime'].split('T')[1].split('-')[0]
-            print(forecast_date + ': ' + hourly_forecast['shortForecast'] + ': ' + hourly_forecast['detailedForecast'])
+            print(forecast_date + ': ' + hourly_forecast['shortForecast'] + ': ' + self.userperfs.checkTemp(hourly_forecast['temperature']) + ': ' + hourly_forecast['windSpeed'] + ' ' + hourly_forecast['windDirection'])
