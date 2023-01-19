@@ -39,15 +39,6 @@ class wbgt:
         getNDFD(self.ndfdAPI)
         #return response.json()
 
-iTemp = 70
-iDwpt = 44
-iRH = 50
-iWspd = 5
-iYear = 2019
-iMonth = 7
-iDay = 1
-presMB = 1000
-iCloud = 50
 
 def daysSince2000Jan0(y, m, d):
     return (367 * (y) - ((7 * ((y) + (((m) + 9) / 12))) / 4) + ((275 * (m)) / 9) + (d) - 730530)
@@ -353,47 +344,6 @@ def Julian(year, month, day):
     nJulian = lMonth[month - 1] + day
     return nJulian
 
-
-""" def calcDwpt():
-    T = (.556 * (iTemp - 32.0)) + 273.15
-    a = 0.0091379024*T + 6106.396/T - math.log(iRH/100.)
-    b = math.sqrt((a*a) - 223.1986)
-    DpT = (a-b)/0.0182758048
-    DewPtF = (DpT-273.15)*1.8+32.
-    return math.round(DewPtF)
-
-
-def calcRH():
-    Tc = .556 * (iTemp - 32.0)
-    Tdc = .556 * (iDwpt - 32.0)
-    Vt = 6.11 * math.pow(10, (Tc * 7.5 / (Tc + 237.3)))
-    Vd = 6.11 * math.pow(10, (Tdc * 7.5 / (Tdc + 237.3)))
-    RH = (Vd / Vt) * 100.0
-    return math.round(RH) """
-def setTemp(iTemp):
-    iTemp = int(50)
-    return iTemp
-
-def setDwpt(iDwpt):
-    iDwpt = int(44)
-    return iDwpt
-
-def setRH(iRH):
-    iRH = int(30)
-    return iRH
-
-def setAlt(iAlt):
-    iAlt = int(700)
-    return iAlt
-
-def setSky(iSky):
-    iSky = int(30)
-    return iSky
-
-def setSpd(iSpd):
-    iSpd = int(0)
-    return iSpd
-
 def getNDFD(ndfdAPI):
     latString = (ndfdAPI['location']['latitude'])
 
@@ -408,30 +358,61 @@ def getNDFD(ndfdAPI):
         maxDay = "Tomorrow"
     maxT = (ndfdAPI['data']['temperature'][maxPd])
     if (int(maxT) >= 40 and int(maxT) <= 130):
-        setTemp(maxT)
+        global iTemp
+        iTemp = int(maxT)
 
     sky = (ndfdAPI['data']['weather'][maxPd])
+    global iSky
     if (sky == "Sunny"):
-        setSky(0)
+        iSky = 0
     elif (sky == "Hot" or sky == "Mostly Sunny" or sky == "Partly Cloudy"):
-        setSky(20)
+        iSky = 20
     elif (sky == "Mostly Cloudy" or sky == "Partly Sunny"):
-        setSky(60)
+        iSky = 60
     elif (sky == "Cloudy"):
-        setSky(100)
+        iSky = 100
     else:
-        setSky(50)
+        iSky = 50
+
     dwpt = (ndfdAPI['currentobservation']['Dewp'])
+    global iDwpt
     if (int(dwpt) >= 40 and int(dwpt) <= 130):
-        setDwpt(dwpt)
+        iDwpt = int(dwpt)
+    else:
+        iDwpt = 50
+
     spd = (ndfdAPI['currentobservation']['Winds'])
+    global iSpd
     if (int(spd) >= 0 and int(spd) <= 100):
-        setSpd(spd)
+        iSpd = int(spd)
+
     pres = float((ndfdAPI['currentobservation']['Altimeter']))
+    global presMB
     if (int(pres) >= 26 and int(pres) <= 34):
         presMB = pres*33.8639
     else:
         presMB = 1000
+
+    rh = (ndfdAPI['currentobservation']['Relh'])
+    global iRH
+    if (int(rh) >= 0 and int(rh) <= 100):
+        iRH = int(rh)
+    else:
+        iRH = 50
+
+    wind = (ndfdAPI['currentobservation']['Winds'])
+    global iWspd
+    iWspd = int(wind)
+
+    global iYear
+    global iMonth
+    global iDay
+    iYear = int((ndfdAPI['time']['startValidTime'][0][0:4]))
+    iMonth = int((ndfdAPI['time']['startValidTime'][0][5:7]))
+    iDay = int((ndfdAPI['time']['startValidTime'][0][8:10]))
+
+    global iCloud
+    iCloud = 50 # default to 50% cloud cover if no data is available
 
     calcWBGT(latString)
 
@@ -441,10 +422,6 @@ def calcWBGT(latitude):
     if (T < 80):
         HeatIndex = T
     else:
-        Tc = .556 * (iTemp - 32.0)
-        Tdc = .556 * (iDwpt - 32.0)
-        # Vt = 6.11 * pow(10,(Tc * 7.5 / (Tc + 237.3)))
-        # Vd = 6.11 * pow(10,(Tdc * 7.5 / (Tdc + 237.3)))
         RH = iRH
         A = -42.379
         B = 2.04901523 * T
@@ -465,17 +442,6 @@ def calcWBGT(latitude):
             HeatIndex = HeatIndex + (((RH-85)/10)*((87-T)/5))
 
     heat = round(HeatIndex)
-    if (heat < 100):
-        backcolor = "#00ff00"
-    elif (heat < 105):
-        backcolor = "#ffff00"
-    elif (heat < 110):
-        backcolor = "#ff561f"
-    elif (heat < 115):
-        backcolor = "#ff7ad2"
-    else:
-        backcolor = "#c07aff"
-
 
     # wbgt
     maxFlux = get_max_solar_flux(latitude, iYear, iMonth, iDay)
