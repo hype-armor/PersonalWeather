@@ -1,6 +1,6 @@
 class UserPreferences:
-    dictoftemps = {'Burning': 90, 'warm': 75, 'justright': 72, 'cool': 65, 'toocold': 60,
-                   'Freezing': 50, 'arctic': 40, 'polar': 30, 'frozen': 20, 'ice': 10, 'frostbite': 0}
+    dictoftemps = {'Scorching': 90, 'Hot': 84, 'Warm': 78, 'Mild': 72, 'Cool': 65,
+                    'Chilly': 60, 'Cold': 50, 'Freezing': 50, 'Frostbite': 32}
 
     def __init__(self):
         print("UserPreferences.__init__")
