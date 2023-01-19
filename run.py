@@ -1,24 +1,32 @@
+"run.py"
 import nwsapi
+import ziptolatlong
+
+# Get the lat and long for the zip code
+lat, lng = ziptolatlong.get('74037')
 
 # Create a new instance of the API
-nws = nwsapi.nws('90210')
-nws.GetForecast()
-nws.GetHourlyForecast()
+nws = nwsapi.NWS(lat, lng)
+#nws.GetForecast()
+#nws.GetHourlyForecast()
 
-if nws.temperature >= 78:
+if nws.currentWeather.temperature >= 78:
+    # take whichever is higher, the heat index or the wbgt
     import wbgt
-    object = wbgt.wbgt(nws.lat, nws.lng)
-    if object.feelslike > object.heatindex:
-        print (object.feelslike)
-        print ('WBGT ' + nws.userperfs.checkTemp(object.feelslike))
+    nwswbgt = wbgt.WBGT(nws.lat, nws.lng)
+    feelslike, heatindex = nwswbgt.update()
+    print (feelslike)
+    print (heatindex)
+    if feelslike > heatindex:
+        print ('WBGT ' + nws.userperfs.checkTemp(feelslike))
     else:
-        print (object.heatindex)
-        print ('Heat Index  ' + nws.userperfs.checkTemp(object.heatindex))
-elif nws.temperature >= 46 and nws.temperature <= 77 or (nws.temperature >= 46 and nws.windspeed < 3):
-    print (nws.temperature)
-    print ('Temperature ' + nws.userperfs.checkTemp(nws.temperature))
-elif nws.temperature > -45 and nws.temperature < 45 and nws.windspeed >= 3:
+        print ('Heat Index  ' + nws.userperfs.checkTemp(heatindex))
+elif nws.currentWeather.temperature >= 45 and nws.currentWeather.temperature <= 77 or \
+        (nws.currentWeather.temperature >= 45 and nws.windspeed < 3):
+    print (nws.currentWeather.temperature)
+    print ('Temperature ' + nws.userperfs.checkTemp(nws.currentWeather.temperature))
+elif nws.currentWeather.temperature > -45 and nws.currentWeather.temperature < 45 and nws.windspeed >= 3:
     import windchill
-    f,c,w = windchill.CalculateWindChill(nws.temperature, nws.windspeed)
+    f,c,w = windchill.CalculateWindChill(nws.currentWeather.temperature, nws.windspeed)
     print (f)
     print ('Windchill ' + nws.userperfs.checkTemp(f))

@@ -2,86 +2,84 @@ import math
 import json
 import requests
 from types import SimpleNamespace
-
+import nwsclass
 
 
 RADEG = 180.0 / math.pi
 DEGRAD = math.pi / 180.0
 INV360 = 1.0 / 360.0
 
-class wbgt:
+class WBGT:
+    "Wet Bulb Globe Temperature"
     lat = 0.0
     lng = 0.0
     ndfdAPI = None
     feelslike = None
     heatindex = None
+    Forecast = nwsclass.Forecast()
     def __init__(self, lat, lng):
         self.lat = lat
         self.lng = lng
-        self.json = None
-        self.feelslike, self.heatindex = self.GetSpecialForecast(lat, lng)
 
-    def GetSpecialForecast(self, latitude, longitude):
-        endpoint = "https://forecast.weather.gov/MapClick.php?w0=t&w1=td&w2=hi&w3=sfcwind&w3u=0&w4=sky&w5=pop&w6=rh&w7=rain&w8=thunder&pqpfhr=6&AheadHour=0&Submit=Submit&FcstType=json&textField1=" 
-        endpoint += str(latitude)
-        endpoint += "&textField2="
-        endpoint += str(longitude)
-        endpoint += "&site=all&unit=0&dd=&bw="
-        # Make the API request with timeout set to 10 seconds
-        response = requests.get(endpoint, timeout=30)
-        
-        # Check if the request was successful
-        if response.status_code != 200:
-            return None
-        
-        # Parse the JSON response
-        self.ndfdAPI = response.json()
-        return getNDFD(self.ndfdAPI)
-        
+    def update(self):
+        "Update the forecast"
+        forecast_json = self.Forecast.get_special_forecast(self.lat, self.lng)
+        self.feelslike, self.heatindex = getNDFD(forecast_json)
+        return self.feelslike, self.heatindex
 
-
-def daysSince2000Jan0(y, m, d):
+def days_since_2000_jan0(y, m, d):
+    "Return the number of days since 2000 Jan 0."
     return (367 * (y) - ((7 * ((y) + (((m) + 9) / 12))) / 4) + ((275 * (m)) / 9) + (d) - 730530)
 
 
 def sind(x):
+    "Return the sine of x degrees."
     return math.sin(float(x) * DEGRAD)
 
 
 def cosd(x):
+    "Return the cosine of x degrees."
     return math.cos(float(x) * DEGRAD)
 
 
 def tand(x):
+    "Return the tangent of x degrees."
     return math.tan(float(x) * DEGRAD)
 
 def acosd(x):
+    "Return the arc cosine of x, in degrees."
     return math.acos(x) * RADEG
 
 
 def atan2d(y, x):
+    "Return the arc tangent of y/x, in degrees."
     return math.atan2(y, x) * RADEG
 
 
 def sunRiseSet(year, month, day, lon, lat):
+    "Return the sunrise and sunset times for the given date and location."
     return sunriset(year, month, day, lon, lat, -35.0 / 60.0, 1)
 
 
 def civilTwilight(year, month, day, lon, lat):
+    "Return the start and end of civil twilight for the given date and location."
     return sunriset(year, month, day, lon, lat, -6.0, 0)
 
 
 def nauticalTwilight(year, month, day, lon, lat):
+    "Return the start and end of nautical twilight for the given date and location."
     return sunriset(year, month, day, lon, lat, -12.0, 0)
 
 
 def astronomicalTwilight(year, month, day, lon, lat):
+    "Return the start and end of astronomical twilight for the given date and location."
     return sunriset(year, month, day, lon, lat, -18.0, 0)
 
 
 def sunriset(year, month, day, lon, lat, altit, upper_limb):
+    "Return the start and end times of the sun for the given date and location."
     # Compute d of 12h local mean solar time
-    d = daysSince2000Jan0(year, month, day) + 0.5 - (lon / 360.0)
+    d = days_since_2000_jan0(year, month, day) + 0.5 - (lon / 360.0)
 
     # Compute local sidereal time of this moment
     sidtime = revolution(GMST0(d) + 180.0 + lon)
@@ -108,10 +106,8 @@ def sunriset(year, month, day, lon, lat, altit, upper_limb):
     cost = (sind(altit) - sind(lat) * sind(sdec)) / (cosd(lat) * cosd(sdec))
 
     if (cost >= 1.0):
-        rc = -1
         t = 0.0
     elif (cost <= -1.0):
-        rc = +1
         t = 12.0
     else:
         t = acosd(cost) / 15.0
@@ -120,8 +116,9 @@ def sunriset(year, month, day, lon, lat, altit, upper_limb):
 
 
 def daylen(year, month, day, lon, lat, altit, upper_limb):
+    "Return the length of the day (sunrise to sunset) for the given date and location."
     # Compute d of 12h local mean solar time
-    d = daysSince2000Jan0(year, month, day) + 0.5 - (lon / 360.0)
+    d = days_since_2000_jan0(year, month, day) + 0.5 - (lon / 360.0)
 
     # Compute obliquity of ecliptic (inclination of Earth's axis)
     obl_ecl = 23.4393 - 3.563E-7 * d
@@ -156,7 +153,7 @@ def daylen(year, month, day, lon, lat, altit, upper_limb):
 
 
 def sunpos(d):
-
+    "Return the ecliptic longitude and radius vector of the Sun."
     # Compute mean elements
     M = revolution(356.0470 + 0.9856002585 * d)
     w = 282.9404 + 4.70935E-5 * d
@@ -176,6 +173,7 @@ def sunpos(d):
 
 
 def sunRADec(d):
+    "Return the right ascension and declination of the Sun."
     # Compute Sun's ecliptical coordinates
     res = sunpos(d)
     lon = res[0]
@@ -200,17 +198,10 @@ def sunRADec(d):
 
 
 def zenith(year, month, day, hour, minute, lon, lat, timeshiftHr, jDay):
+    "Return the zenith angle of the Sun for the given date and location."
     rdat = []
     rdat = sunRADec(jDay)
-    ra = rdat[0]
     dec = rdat[1]
-    r = rdat[2]
-
-    # Compute d of 12h local mean solar time
-    d = daysSince2000Jan0(year, month, day) + 0.5 - (lon / 360.0)
-
-    # Compute obliquity of ecliptic (inclination of Earth's axis)
-    obl_ecl = 23.4393 - 3.563E-7 * d
 
     # Compute sine and cosine of Sun's declination
     sin_sdecl = sind(dec)
@@ -224,55 +215,43 @@ def zenith(year, month, day, hour, minute, lon, lat, timeshiftHr, jDay):
     sdat = sunRiseSet(year, month, day, lon, lat)
     srise = sdat[0]
     sset = sdat[1]
-    daylen = sset - srise
-    solarNoon = srise + 0.5 * daylen
-    solarNoon = solarNoon + timeshiftHr
-    currentTime = hour + (minute / 60.)
-    deltaNoon = currentTime - solarNoon
-    degsHour = 180. / daylen
-    solarHourDeg = math.abs(deltaNoon * degsHour)
-    cos_hr = cosd(solarHourDeg)
+    daylen_value = sset - srise
+    solar_noon = srise + 0.5 * daylen_value
+    solar_noon = solar_noon + timeshiftHr
+    current_time = hour + (minute / 60.)
+    delta_noon = current_time - solar_noon
+    degs_hour = 180. / daylen_value
+    solar_hour_deg = abs(delta_noon * degs_hour)
+    cos_hr = cosd(solar_hour_deg)
 
-    n = sin_sdecl * sin_lat + cos_sdecl * cos_lat * cos_hr
-    if (n > 1):
-        n = 1
+    number = sin_sdecl * sin_lat + cos_sdecl * cos_lat * cos_hr
+    if number > 1:
+        number = 1
 
-    zenith = acosd(n)
-    return [solarHourDeg, zenith]
+    zenith_value = acosd(number)
+    return [solar_hour_deg, zenith_value]
 
 
 def revolution(x):
+    "Reduce angle in degrees to between 0 and 360."
     return (x - 360.0 * math.floor(x * INV360))
 
 
 def rev180(x):
+    "Reduce angle in degrees to between +180 and -180."
     return (x - 360.0 * math.floor(x * INV360 + 0.5))
 
 
 def GMST0(d):
+    "Compute GMST0, the Greenwich Mean Sidereal Time at 0h UT"
     sidtim0 = revolution((180.0 + 356.0470 + 282.9404) +
                          (0.9856002585 + 4.70935E-5) * d)
     return sidtim0
 
-
-""" def solar_altitude(latitude, year, month, day):
-    N = daysSince2000Jan0(year, month, day)
-    res = sunRADec(N)
-    declination = res[1]
-    sr = res[2]
-    altitude = 90.0 - latitude + declination
-    if (altitude > 90):
-        altitude = 90 - (altitude - 90)
-    if (altitude < 0):
-        altitude = 0
-    return altitude """
-
-
 def get_max_solar_flux(latitude, year, month, day):
-
+    "Return the maximum solar flux for the given date and location."
     edat = []
     edat = equation_of_time(year, month, day, latitude)
-    fEot = edat[0]
     fR0r = edat[1]
     tDeclsc = []
     tDeclsc = edat[2]
@@ -294,13 +273,14 @@ def get_max_solar_flux(latitude, year, month, day):
 
 
 def isleap(year):
+    "Return True if year is a leap year."
     if (year % 4 == 0 and year % 10 != 0):
         return True
     return False
 
 
 def equation_of_time(year, month, day, latitude):
-
+    ""
     nJulianDate = Julian(year, month, day)
 
     if (isleap(year)):
@@ -327,6 +307,7 @@ def equation_of_time(year, month, day, latitude):
 
 
 def Solcons(dAlf):
+    "Compute the solar constant."
     dVar = 1.0 / (1.0 - 9.464e-4 * math.sin(dAlf) - 0.01671 * math.cos(dAlf) -
                   + 1.489e-4 * math.cos(2.0 * dAlf) - 2.917e-5 * math.sin(3.0 * dAlf) -
                   + 3.438e-4 * math.pow(math.cos(4.0 * dAlf), 2))
@@ -334,7 +315,7 @@ def Solcons(dAlf):
 
 
 def Julian(year, month, day):
-
+    "Return the Julian day number for the given date."
     if isleap(year):
         lMonth = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366]
 
@@ -345,6 +326,7 @@ def Julian(year, month, day):
     return nJulian
 
 def getNDFD(ndfdAPI):
+    "Get the NDFD data."
     latString = (ndfdAPI['location']['latitude'])
 
     lonString = (ndfdAPI['location']['longitude'])
