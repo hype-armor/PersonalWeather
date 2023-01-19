@@ -23,12 +23,3 @@ class UserPreferences:
             return "Too cold"
         else:
             return "Freezing"
-
-
-""" userperfs = UserPreferences()
-print(userperfs.checkTemp(90)) # returns "Too hot"
-print(userperfs.checkTemp(75)) # returns "Warm"
-print(userperfs.checkTemp(72)) # returns "Just right"
-print(userperfs.checkTemp(65)) # returns "Cool"
-print(userperfs.checkTemp(60)) # returns "Too cold"
-print(userperfs.checkTemp(59)) # returns "Error" """
