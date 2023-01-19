@@ -76,4 +76,4 @@ class nws(object):
         for hourly_forecast in hourly_forecast_data['properties']['periods'][0:3]:
             # parse the forecast date and time
             forecast_date = hourly_forecast['startTime'].split('T')[1].split('-')[0]
-            print(forecast_date + ': ' + hourly_forecast['shortForecast'] + ': ' + self.userperfs.checkTemp(hourly_forecast['temperature']) + ': ' + hourly_forecast['windSpeed'] + ' ' + hourly_forecast['windDirection'])
+            print('Without WBGT' + ' ' + self.userperfs.checkTemp(hourly_forecast['temperature']))

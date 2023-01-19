@@ -12,14 +12,14 @@ INV360 = 1.0 / 360.0
 class wbgt:
     lat = 0.0
     lng = 0.0
-    alt = 0.0
     ndfdAPI = None
-    def __init__(self, lat, lng, alt):
+    feelslike = None
+    heatindex = None
+    def __init__(self, lat, lng):
         self.lat = lat
         self.lng = lng
-        self.alt = alt
         self.json = None
-        self.GetSpecialForecast(lat, lng)
+        self.feelslike, self.heatindex = self.GetSpecialForecast(lat, lng)
 
     def GetSpecialForecast(self, latitude, longitude):
         endpoint = "https://forecast.weather.gov/MapClick.php?w0=t&w1=td&w2=hi&w3=sfcwind&w3u=0&w4=sky&w5=pop&w6=rh&w7=rain&w8=thunder&pqpfhr=6&AheadHour=0&Submit=Submit&FcstType=json&textField1=" 
@@ -36,8 +36,8 @@ class wbgt:
         
         # Parse the JSON response
         self.ndfdAPI = response.json()
-        getNDFD(self.ndfdAPI)
-        #return response.json()
+        return getNDFD(self.ndfdAPI)
+        
 
 
 def daysSince2000Jan0(y, m, d):
@@ -414,7 +414,7 @@ def getNDFD(ndfdAPI):
     global iCloud
     iCloud = 50 # default to 50% cloud cover if no data is available
 
-    calcWBGT(latString)
+    return calcWBGT(latString)
 
 
 def calcWBGT(latitude):
@@ -507,7 +507,7 @@ def calcWBGT(latitude):
         nwb = 85
 
     shady = 0.3*T+0.7*nwb
-    wbgt = 0.2*tg+0.7*nwb+0.1*T
+    wbgt = round(0.2*tg+0.7*nwb+0.1*T)
 
-    wb = round(wbgt)
-    print("WBGT: " + str(wb))
+    return wbgt, heat
+    
