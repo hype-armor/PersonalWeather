@@ -13,3 +13,9 @@ print (object.feelslike)
 print (object.heatindex)
 print ('With WBGT' + ' ' + nws.userperfs.checkTemp(object.feelslike))
 print ('With HI  ' + ' ' + nws.userperfs.checkTemp(object.heatindex))
+
+# get windchill
+import windchill
+f,c,w = windchill.CalculateWindChill(nws.temperature, nws.windspeed)
+print (f)
+print ('With WC  ' + ' ' + nws.userperfs.checkTemp(f))

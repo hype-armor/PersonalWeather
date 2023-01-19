@@ -8,6 +8,8 @@ class nws(object):
     lat = ''
     lng = ''
     json = ''
+    temperature = ''
+    windspeed = ''
     userperfs = UserPreferences.UserPreferences()
 
     def __init__(self, zipcode):
@@ -71,6 +73,11 @@ class nws(object):
         hourly_forecast_data = hourly_forecast_response.json()
 
         hourly_forecast = nwsclass.HourlyForecast(hourly_forecast_data['properties']['periods'][0]['startTime'], hourly_forecast_data['properties']['periods'][0]['endTime'], hourly_forecast_data['properties']['periods'][0]['temperature'], hourly_forecast_data['properties']['periods'][0]['temperatureUnit'], hourly_forecast_data['properties']['periods'][0]['windSpeed'], hourly_forecast_data['properties']['periods'][0]['windDirection'], hourly_forecast_data['properties']['periods'][0]['shortForecast'], hourly_forecast_data['properties']['periods'][0]['detailedForecast'])
+
+        # set temperature and windspeed
+        self.temperature = hourly_forecast.temperature
+        # split the string at space and take the first element
+        self.windspeed = hourly_forecast.wind_speed.split(' ')[0]
 
         # print the hourly forecast for only the next 3 hours using a loop
         for hourly_forecast in hourly_forecast_data['properties']['periods'][0:3]:
