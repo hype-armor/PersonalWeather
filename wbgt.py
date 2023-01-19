@@ -1,34 +1,68 @@
 import math
 import json
+import requests
+from types import SimpleNamespace
+
+
 
 RADEG = 180.0 / math.pi
 DEGRAD = math.pi / 180.0
 INV360 = 1.0 / 360.0
 
+class wbgt:
+    lat = 0.0
+    lng = 0.0
+    alt = 0.0
+    ndfdAPI = None
+    def __init__(self, lat, lng, alt):
+        self.lat = lat
+        self.lng = lng
+        self.alt = alt
+        self.json = None
+        self.GetSpecialForecast(lat, lng)
+
+    def GetSpecialForecast(self, latitude, longitude):
+        endpoint = "https://forecast.weather.gov/MapClick.php?w0=t&w1=td&w2=hi&w3=sfcwind&w3u=0&w4=sky&w5=pop&w6=rh&w7=rain&w8=thunder&pqpfhr=6&AheadHour=0&Submit=Submit&FcstType=json&textField1=" 
+        endpoint += str(latitude)
+        endpoint += "&textField2="
+        endpoint += str(longitude)
+        endpoint += "&site=all&unit=0&dd=&bw="
+        # Make the API request with timeout set to 10 seconds
+        response = requests.get(endpoint, timeout=30)
+        
+        # Check if the request was successful
+        if response.status_code != 200:
+            return None
+        
+        # Parse the JSON response
+        self.ndfdAPI = response.json()
+        getNDFD(self.ndfdAPI)
+        #return response.json()
+
+iTemp = 70
+iDwpt = 44
+iRH = 50
+iWspd = 5
+iYear = 2019
+iMonth = 7
+iDay = 1
+presMB = 1000
+iCloud = 50
 
 def daysSince2000Jan0(y, m, d):
     return (367 * (y) - ((7 * ((y) + (((m) + 9) / 12))) / 4) + ((275 * (m)) / 9) + (d) - 730530)
 
 
 def sind(x):
-    return math.sin(x * DEGRAD)
+    return math.sin(float(x) * DEGRAD)
 
 
 def cosd(x):
-    return math.cos(x * DEGRAD)
+    return math.cos(float(x) * DEGRAD)
 
 
 def tand(x):
-    return math.tan(x * DEGRAD)
-
-
-def atand(x):
-    return math.atan(x) * RADEG
-
-
-def asind(x):
-    return math.asin(x) * RADEG
-
+    return math.tan(float(x) * DEGRAD)
 
 def acosd(x):
     return math.acos(x) * RADEG
@@ -36,22 +70,6 @@ def acosd(x):
 
 def atan2d(y, x):
     return math.atan2(y, x) * RADEG
-
-
-def dayLength(year, month, day, lon, lat):
-    return daylen(year, month, day, lon, lat, -35.0 / 60.0, 1)
-
-
-def dayCivilTwilightLength(year, month, day, lon, lat):
-    return daylen(year, month, day, lon, lat, -6.0, 0)
-
-
-def dayNauticalTwilightLength(year, month, day, lon, lat):
-    return daylen(year, month, day, lon, lat, -12.0, 0)
-
-
-def dayAstronomicalTwilightLength(year, month, day, lon, lat):
-    return daylen(year, month, day, lon, lat, -18.0, 0)
 
 
 def sunRiseSet(year, month, day, lon, lat):
@@ -246,7 +264,7 @@ def GMST0(d):
     return sidtim0
 
 
-def solar_altitude(latitude, year, month, day):
+""" def solar_altitude(latitude, year, month, day):
     N = daysSince2000Jan0(year, month, day)
     res = sunRADec(N)
     declination = res[1]
@@ -256,7 +274,7 @@ def solar_altitude(latitude, year, month, day):
         altitude = 90 - (altitude - 90)
     if (altitude < 0):
         altitude = 0
-    return altitude
+    return altitude """
 
 
 def get_max_solar_flux(latitude, year, month, day):
@@ -320,7 +338,7 @@ def equation_of_time(year, month, day, latitude):
 def Solcons(dAlf):
     dVar = 1.0 / (1.0 - 9.464e-4 * math.sin(dAlf) - 0.01671 * math.cos(dAlf) -
                   + 1.489e-4 * math.cos(2.0 * dAlf) - 2.917e-5 * math.sin(3.0 * dAlf) -
-                  + 3.438e-4 * math.pow(math.cos(4.0 * dAlf)), 2)
+                  + 3.438e-4 * math.pow(math.cos(4.0 * dAlf), 2))
     return dVar
 
 
@@ -336,7 +354,7 @@ def Julian(year, month, day):
     return nJulian
 
 
-def calcDwpt():
+""" def calcDwpt():
     T = (.556 * (iTemp - 32.0)) + 273.15
     a = 0.0091379024*T + 6106.396/T - math.log(iRH/100.)
     b = math.sqrt((a*a) - 223.1986)
@@ -351,29 +369,48 @@ def calcRH():
     Vt = 6.11 * math.pow(10, (Tc * 7.5 / (Tc + 237.3)))
     Vd = 6.11 * math.pow(10, (Tdc * 7.5 / (Tdc + 237.3)))
     RH = (Vd / Vt) * 100.0
-    return math.round(RH)
+    return math.round(RH) """
+def setTemp(iTemp):
+    iTemp = int(50)
+    return iTemp
 
+def setDwpt(iDwpt):
+    iDwpt = int(44)
+    return iDwpt
 
-def getNDFD(lonLat):
-    ndfdAPI = "https:#forecast.weather.gov/MapClick.php?w0=t&w1=td&w2=hi&w3=sfcwind&w3u=0&w4=sky&w5=pop&w6=rh&w7=rain&w8=thunder&pqpfhr=6&AheadHour=0&Submit=Submit&FcstType=json&textField1=" + \
-        lonLat[1]+"&textField2="+lonLat[0]+"&site=all&unit=0&dd=&bw="
+def setRH(iRH):
+    iRH = int(30)
+    return iRH
 
-    latString = (data.location.latitude)
+def setAlt(iAlt):
+    iAlt = int(700)
+    return iAlt
 
-    lonString = (data.location.longitude)
-    elevationString = (data.location.elevation)
-    label0 = (data.time.tempLabel[0])
+def setSky(iSky):
+    iSky = int(30)
+    return iSky
+
+def setSpd(iSpd):
+    iSpd = int(0)
+    return iSpd
+
+def getNDFD(ndfdAPI):
+    latString = (ndfdAPI['location']['latitude'])
+
+    lonString = (ndfdAPI['location']['longitude'])
+    elevationString = (ndfdAPI['location']['elevation'])
+    label0 = (ndfdAPI['time']['tempLabel'][0]) # this is coming from k-p12h-n14-1.
     if (label0 == "High"):
         maxPd = 0
         maxDay = "Today"
     else:
         maxPd = 1
         maxDay = "Tomorrow"
-    maxT = (data.data.temperature[maxPd])
-    if (maxT >= 40 and maxT <= 130):
+    maxT = (ndfdAPI['data']['temperature'][maxPd])
+    if (int(maxT) >= 40 and int(maxT) <= 130):
         setTemp(maxT)
 
-    sky = (data.data.weather[maxPd])
+    sky = (ndfdAPI['data']['weather'][maxPd])
     if (sky == "Sunny"):
         setSky(0)
     elif (sky == "Hot" or sky == "Mostly Sunny" or sky == "Partly Cloudy"):
@@ -384,28 +421,22 @@ def getNDFD(lonLat):
         setSky(100)
     else:
         setSky(50)
-    dwpt = (data.currentobservation.Dewp)
-    if (dwpt >= 40 and dwpt <= 130):
+    dwpt = (ndfdAPI['currentobservation']['Dewp'])
+    if (int(dwpt) >= 40 and int(dwpt) <= 130):
         setDwpt(dwpt)
-    spd = (data.currentobservation.Winds)
-    if (spd >= 0 and spd <= 100):
+    spd = (ndfdAPI['currentobservation']['Winds'])
+    if (int(spd) >= 0 and int(spd) <= 100):
         setSpd(spd)
-    pres = (data.currentobservation.Altimeter)
-    if (pres >= 26 and pres <= 34):
+    pres = float((ndfdAPI['currentobservation']['Altimeter']))
+    if (int(pres) >= 26 and int(pres) <= 34):
         presMB = pres*33.8639
     else:
         presMB = 1000
 
-    slp = (data.currentobservation.SLP)
-    console.log(maxDay+"- MaxT="+maxT+" dwpt="+dwpt+" spd=" +
-                spd+" pres="+pres+" slp="+slp+" sky="+sky)
-    updateRH()
-    document.getElementById("loading").src = ""
-
-    calcWBGT()
+    calcWBGT(latString)
 
 
-def calcWBGT():
+def calcWBGT(latitude):
     T = iTemp
     if (T < 80):
         HeatIndex = T
@@ -433,7 +464,7 @@ def calcWBGT():
         if (RH > 85 and T >= 80 and T <= 87):
             HeatIndex = HeatIndex + (((RH-85)/10)*((87-T)/5))
 
-    heat = math.round(HeatIndex)
+    heat = round(HeatIndex)
     if (heat < 100):
         backcolor = "#00ff00"
     elif (heat < 105):
@@ -445,10 +476,9 @@ def calcWBGT():
     else:
         backcolor = "#c07aff"
 
-    document.getElementById("hiValue").innerHTML = math.round(heat)
-    (document.getElementById("hiValue")).style.backgroundColor = backcolor
+
     # wbgt
-    maxFlux = get_max_solar_flux(lonLat[1], iYear, iMonth, iDay)
+    maxFlux = get_max_solar_flux(latitude, iYear, iMonth, iDay)
     cosz = 0.707
     if (iWspd < 4):
         spd = 4
@@ -513,16 +543,5 @@ def calcWBGT():
     shady = 0.3*T+0.7*nwb
     wbgt = 0.2*tg+0.7*nwb+0.1*T
 
-    wb = math.round(wbgt)
-    if (wb < 83):
-        backcolor = "#00ff00"
-    elif (wb < 86):
-        backcolor = "#ffff00"
-    elif (wb < 90):
-        backcolor = "#ff561f"
-    elif (wb < 93):
-        backcolor = "#ff7ad2"
-    else:
-        backcolor = "#c07aff"
-    document.getElementById("wbgtValue").innerHTML = wb
-    (document.getElementById("wbgtValue")).style.backgroundColor = backcolor
+    wb = round(wbgt)
+    print("WBGT: " + str(wb))
