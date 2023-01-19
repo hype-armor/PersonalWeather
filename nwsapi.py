@@ -9,7 +9,7 @@ class nws(object):
     lng = ''
     json = ''
     temperature = ''
-    windspeed = ''
+    windspeed = 0
     userperfs = UserPreferences.UserPreferences()
 
     def __init__(self, zipcode):
@@ -77,10 +77,4 @@ class nws(object):
         # set temperature and windspeed
         self.temperature = hourly_forecast.temperature
         # split the string at space and take the first element
-        self.windspeed = hourly_forecast.wind_speed.split(' ')[0]
-
-        # print the hourly forecast for only the next 3 hours using a loop
-        for hourly_forecast in hourly_forecast_data['properties']['periods'][0:3]:
-            # parse the forecast date and time
-            forecast_date = hourly_forecast['startTime'].split('T')[1].split('-')[0]
-            print('Without WBGT' + ' ' + self.userperfs.checkTemp(hourly_forecast['temperature']))
+        self.windspeed = int(hourly_forecast.wind_speed.split(' ')[0])
