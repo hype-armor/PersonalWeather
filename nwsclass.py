@@ -11,7 +11,7 @@ class HourlyForecast:
         self.end_time = end_time
         self.temperature = temperature
         self.temperature_unit = temperature_unit
-        self.wind_speed = wind_speed
+        self.wind_speed = int(wind_speed.split(' ')[0])
         self.wind_direction = wind_direction
         #self.wind_direction_compass = wind_direction_compass
         self.short_forecast = short_forecast

@@ -1,16 +1,19 @@
 "run.py"
 import nwsapi
 import ziptolatlong
+import UserPreferences
+
+userperfs = UserPreferences.UserPreferences()
 
 # Get the lat and long for the zip code
 lat, lng = ziptolatlong.get('74037')
 
 # Create a new instance of the API
 nws = nwsapi.NWS(lat, lng)
-#nws.GetForecast()
-#nws.GetHourlyForecast()
+currentWeather = nws.get_current_weather()
+nws.get_hourly_forecast()
 
-if nws.currentWeather.temperature >= 78:
+if currentWeather.temperature >= 78:
     # take whichever is higher, the heat index or the wbgt
     import wbgt
     nwswbgt = wbgt.WBGT(nws.lat, nws.lng)
@@ -18,15 +21,15 @@ if nws.currentWeather.temperature >= 78:
     print (feelslike)
     print (heatindex)
     if feelslike > heatindex:
-        print ('WBGT ' + nws.userperfs.checkTemp(feelslike))
+        print ('WBGT ' + userperfs.checkTemp(feelslike))
     else:
-        print ('Heat Index  ' + nws.userperfs.checkTemp(heatindex))
-elif nws.currentWeather.temperature >= 45 and nws.currentWeather.temperature <= 77 or \
-        (nws.currentWeather.temperature >= 45 and nws.windspeed < 3):
-    print (nws.currentWeather.temperature)
-    print ('Temperature ' + nws.userperfs.checkTemp(nws.currentWeather.temperature))
-elif nws.currentWeather.temperature > -45 and nws.currentWeather.temperature < 45 and nws.windspeed >= 3:
+        print ('Heat Index  ' + userperfs.checkTemp(heatindex))
+elif currentWeather.temperature >= 45 and currentWeather.temperature <= 77 or \
+        (currentWeather.temperature >= 45 and currentWeather.wind_speed < 3):
+    print (currentWeather.temperature)
+    print ('Temperature ' + userperfs.checkTemp(currentWeather.temperature))
+elif currentWeather.temperature > -45 and currentWeather.temperature < 45 and currentWeather.wind_speed >= 3:
     import windchill
-    f,c,w = windchill.CalculateWindChill(nws.currentWeather.temperature, nws.windspeed)
+    f,c,w = windchill.CalculateWindChill(currentWeather.temperature, currentWeather.wind_speed)
     print (f)
-    print ('Windchill ' + nws.userperfs.checkTemp(f))
+    print ('Windchill ' + userperfs.checkTemp(f))
