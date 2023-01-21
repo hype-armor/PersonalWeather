@@ -1,7 +1,5 @@
+" WET BULB GLOBE TEMPERATURE (WBGT) "
 import math
-import json
-import requests
-from types import SimpleNamespace
 import nwsclass
 
 
