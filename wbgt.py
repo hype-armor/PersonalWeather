@@ -16,16 +16,34 @@ class WBGT:
     ndfdAPI = None
     feelslike = None
     heatindex = None
-    Forecast = nwsclass.Forecast()
     def __init__(self, lat, lng):
         self.lat = lat
         self.lng = lng
 
     def update(self):
         "Update the forecast"
-        forecast_json = self.Forecast.get_special_forecast(self.lat, self.lng)
+        forecast_json = self.get_special_forecast(self.lat, self.lng)
         self.feelslike, self.heatindex = getNDFD(forecast_json)
         return self.feelslike, self.heatindex
+
+    def get_special_forecast(self, latitude, longitude):
+        "Get the special forecast from the NWS API"
+        endpoint = "https://forecast.weather.gov/MapClick.php?w0=t&w1=td&w2=hi&w3=sfcwind&w3u=" \
+            + "0&w4=sky&w5=pop&w6=rh&w7=rain&w8=thunder&pqpfhr=6&AheadHour=0&Submit=Submit&" \
+            + "FcstType=json&textField1="
+        endpoint += str(latitude)
+        endpoint += "&textField2="
+        endpoint += str(longitude)
+        endpoint += "&site=all&unit=0&dd=&bw="
+        # Make the API request with timeout set to 10 seconds
+        response = requests.get(endpoint, timeout=30)
+
+        # Check if the request was successful
+        if response.status_code != 200:
+            return None
+
+        # Parse the JSON response
+        return response.json()
 
 def days_since_2000_jan0(y, m, d):
     "Return the number of days since 2000 Jan 0."

@@ -21,29 +21,18 @@ class NWS(object):
         # Parse the JSON response
         self.json = response.json()
 
-        
-
     def get_current_weather(self):
         "Get the current weather from the NWS API"
         # Get the hourly forecast URL from the response
         forecast_hourly_url = self.json['properties']['forecastHourly']
         forecast_hourly_response = requests.get(forecast_hourly_url, timeout=10)
         forecast_hourly_data = forecast_hourly_response.json()
-        # print the current weather
+        # check status code
+        if forecast_hourly_response.status_code != 200:
+            print('Error: ' + forecast_hourly_data['title'])
+            return
         current_data = forecast_hourly_data['properties']['periods'][0]
-        start_time = current_data['startTime']
-        end_time = current_data['endTime']
-        temperature = current_data['temperature']
-        temperature_unit = current_data['temperatureUnit']
-        #temperature_trend = current_data['temperatureTrend']
-        wind_speed = current_data['windSpeed']
-        wind_direction = current_data['windDirection']
-        #icon = current_data['icon']
-        short_forecast = current_data['shortForecast']
-        detailed_forecast = current_data['detailedForecast']
-        currentWeather = nwsclass.HourlyForecast(start_time, end_time, temperature, temperature_unit, \
-            wind_speed, wind_direction, short_forecast, detailed_forecast)
-        return currentWeather
+        return nwsclass.Forecast(current_data)
 
     def get_hourly_forecast(self):
         # Get the forecast URL from the response
@@ -52,14 +41,19 @@ class NWS(object):
         # Make another API request to the forecast URL with timeout set to 10 seconds
         forecast_response = requests.get(forecast_url, timeout=10)
         forecast_data = forecast_response.json()
+        # check status code
+        if forecast_response.status_code != 200:
+            print('Error: ' + forecast_data['title'])
+            return
 
         # print today's forecast
         print(forecast_data['properties']['periods'][0]['name'] + ': ' + forecast_data['properties']['periods'][0]['detailedForecast'])
-        
+
+        # create a list of forecasts
+        forecasts = []
         # loop through forecast data and print out the forecast for each day
         for forecast in forecast_data['properties']['periods']:
-            # parse the forecast date time
-            forecast_date = forecast['startTime'].split('T')[0]
-            # print the forecast date and the forecast
-            print(forecast_date + ': ' + forecast['name'] + ': ' + forecast['detailedForecast'])
+            forecasts.append(nwsclass.Forecast(forecast))
+
+        return forecasts
 
