@@ -1,21 +1,22 @@
+"""Get the latitude and longitude for a zip code"""
 import requests
 
-def get(zip_code):
+class location(object):
+    "This class represents the location object"
+    def __init__(self, data):
+        place = data['places'][0]
+        self.latitude = place['latitude']
+        self.longitude = place['longitude']
+        self.state = place['state']
+        self.state_abbreviation = place['state abbreviation']
+        self.place_name = place['place name']
+
+def get_location_information(zip_code):
+    "Get the latitude and longitude for a zip code"
     # Set up the API endpoint and parameters
     endpoint = 'https://api.zippopotam.us/us/'
-    zip_code = zip_code
 
     # Make the API request
     response = requests.get(endpoint + zip_code, timeout=10)
 
-    # Parse the JSON response
-    data = response.json()
-
-    # Get the latitude and longitude from the response
-    lat = data.get('places')[0].get('latitude')
-    lng = data.get('places')[0].get('longitude')
-
-    # Print the latitude and longitude
-    print(f'Latitude: {lat}, Longitude: {lng}')
-
-    return lat, lng
+    return location(response.json())
