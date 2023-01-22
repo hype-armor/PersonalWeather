@@ -12,7 +12,11 @@ class Forecast:
         self.temperature = current_data['temperature']
         self.temperature_unit = current_data['temperatureUnit']
         self.temperature_trend = current_data['temperatureTrend']
-        self.wind_speed = int(current_data['windSpeed'].split(' ')[0])
+        if len(current_data['windSpeed'].split(' ')) > 2:
+            self.wind_speed = int(current_data['windSpeed'].split(' ')[2])
+        else:
+            self.wind_speed = int(current_data['windSpeed'].split(' ')[0])
+        self.wind_speed_text = current_data['windSpeed']
         self.wind_direction = current_data['windDirection']
         self.icon = current_data['icon']
         self.short_forecast = current_data['shortForecast']
