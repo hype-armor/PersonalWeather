@@ -8,7 +8,8 @@ userperfs = UserPreferences.UserPreferences()
 # Get the lat and long for the zip code
 # miami fl 33195
 # jenks ok 74037
-location = ziptolatlong.get_location_information('74037')
+zip = '74037'
+location = ziptolatlong.get_location_information(zip)
 
 print (location.place_name + ', ' + location.state_abbreviation)
 
@@ -29,8 +30,7 @@ if currentWeather.temperature >= 78:
 
 elif currentWeather.temperature >= 45 and currentWeather.temperature <= 77 or \
         (currentWeather.temperature >= 45 and currentWeather.wind_speed < 3):
-    CURRENT_WEATHER = str(currentWeather.temperature) + '°' + currentWeather.temperature_unit + ' ' + currentWeather.short_forecast
-    CURRENT_WEATHER += 'Temperature ' + userperfs.checkTemp(currentWeather.temperature)
+    CURRENT_WEATHER = 'Temperature ' + userperfs.checkTemp(currentWeather.temperature)
 
 elif currentWeather.temperature > -45 and currentWeather.temperature < 45 and \
     currentWeather.wind_speed >= 3:
@@ -59,11 +59,38 @@ def open_file(filename, type):
     with open(filename, 'r') as f:
         return f.read()
 
+data = {}
+data['product'] = "Greg's Magical Weather api"
+data['version'] = 0.1
+data['releaseDate'] = "2023-01-22T00:00:00.000Z"
+data['author'] = "Gregory A. Morgan Garcia"
 
-example_json = open_file("example.json", "json")
-js = open_file("web/js/gmwa.js", "js")
-index = open_file("web/html/index.html", "html")
+location_json = {}
+for item in vars(location):
+    location_json[item] = getattr(location, item)
+data['location'] = location_json
 
+weather = {}
+current_conditions = {}
+for item in vars(currentWeather):
+    current_conditions[item] = getattr(currentWeather, item)
+
+current_conditions['feels_like'] = CURRENT_WEATHER
+weather['current_conditions'] = current_conditions
+data['weather'] = weather
+
+forecast_json = {}
+conditions = []
+for forecast in forecasts:
+    condition = {}
+    for item in vars(forecast):
+        condition[item] = getattr(forecast, item)
+    conditions.append(condition)
+conditions.append(condition)
+forecast_json['conditions'] = conditions
+data['forecast'] = forecast_json
+
+json_data = json.dumps(data)
 
 
 from flask import Flask
@@ -74,12 +101,12 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
-    return Response(index, mimetype='text/html')
+    return Response(open_file("web/html/index.html", "html"), mimetype='text/html')
 
 @app.route("/js/<path:path>")
 def send_js(path):
-    return Response(js, mimetype='application/javascript')
+    return Response(open_file("web/js/"+path, "js"), mimetype='application/javascript')
 
 @app.route("/api")
 def api():
-    return Response(example_json, mimetype='application/json')
+    return Response(json_data, mimetype='application/json')

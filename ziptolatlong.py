@@ -10,6 +10,8 @@ class location(object):
         self.state = place['state']
         self.state_abbreviation = place['state abbreviation']
         self.place_name = place['place name']
+        self.country = data['country']
+        self.country_abbreviation = data['country abbreviation']
 
 def get_location_information(zip_code):
     "Get the latitude and longitude for a zip code"
