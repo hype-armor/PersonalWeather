@@ -1,0 +1,68 @@
+{
+    "_comment": "http://www.objgen.com/json",
+    "product": "Greg's Magical Weather api",
+    "version": 0.1,
+    "releaseDate": "2023-01-22T00:00:00.000Z",
+    "author": "Gregory A. Morgan Garcia",
+    "location": {
+      "zip": "12345",
+      "lat": "36.3932",
+      "long": "-95.2323",
+      "elevation": "600",
+      "city_name": "Jenks",
+      "state": "Oklahoma",
+      "state_short": "OK",
+      "country": "USA"
+    },
+    "weather": {
+      "current_conditions": {
+        "detailed_forecast": "",
+        "end_time": "2023-01-22T12:00:00-06:00",
+        "icon": "https://api.weather.gov/icons/land/day/snow?size=small",
+        "is_daytime": "True",
+        "name": "",
+        "number": "1",
+        "short_forecast": "Chance Rain And Snow Showers",
+        "start_time": "2023-01-22T11:00:00-06:00",
+        "temperature": "39",
+        "temperature_trend": "None",
+        "temperature_unit": "F",
+        "wind_direction": "NW",
+        "wind_speed": "10"
+      }
+    },
+    "forecast": {
+      "conditions": [
+        {
+          "detailed_forecast": "",
+          "end_time": "2023-01-22T12:00:00-06:00",
+          "icon": "https://api.weather.gov/icons/land/day/snow?size=small",
+          "is_daytime": "True",
+          "name": "",
+          "number": "1",
+          "short_forecast": "Chance Rain And Snow Showers",
+          "start_time": "2023-01-22T11:00:00-06:00",
+          "temperature": "39",
+          "temperature_trend": "None",
+          "temperature_unit": "F",
+          "wind_direction": "NW",
+          "wind_speed": "10"
+        },
+        {
+          "detailed_forecast": "",
+          "end_time": "2023-01-22T12:00:00-06:00",
+          "icon": "https://api.weather.gov/icons/land/day/snow?size=small",
+          "is_daytime": "True",
+          "name": "",
+          "number": "1",
+          "short_forecast": "Chance Rain And Snow Showers",
+          "start_time": "2023-01-22T11:00:00-06:00",
+          "temperature": "39",
+          "temperature_trend": "None",
+          "temperature_unit": "F",
+          "wind_direction": "NW",
+          "wind_speed": "10"
+        }
+      ]
+    }
+  }
