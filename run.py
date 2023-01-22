@@ -2,6 +2,7 @@
 import nwsapi
 import ziptolatlong
 import UserPreferences
+import wbgt
 
 userperfs = UserPreferences.UserPreferences()
 
@@ -17,40 +18,34 @@ print (location.place_name + ', ' + location.state_abbreviation)
 nws = nwsapi.NWS(location.latitude, location.longitude)
 currentWeather = nws.get_current_weather()
 
-CURRENT_WEATHER = ""
-if currentWeather.temperature >= 78:
-    # take whichever is higher, the heat index or the wbgt
-    import wbgt
-    nwswbgt = wbgt.WBGT(location.latitude, location.longitude)
-    feelslike, heatindex = nwswbgt.update()
-    if feelslike > heatindex:
-        CURRENT_WEATHER = 'WBGT ' + userperfs.checkTemp(feelslike)
+def select_temperature_modifier(temperature, wind_speed):
+    if temperature >= 78:
+        # take whichever is higher, the heat index or the wbgt
+        nwswbgt = wbgt.WBGT(location.latitude, location.longitude)
+        feelslike, heatindex = nwswbgt.update()
+        if feelslike > heatindex:
+            return 'WBGT ' + userperfs.checkTemp(feelslike)
+        else:
+            return 'Heat Index  ' + userperfs.checkTemp(heatindex)
+    elif temperature >= 45 and temperature <= 77 or \
+            (wind_speed < 3):
+        return 'Temperature ' + userperfs.checkTemp(temperature)
+    elif temperature > -45 and temperature < 45 and \
+        wind_speed >= 3:
+        import windchill
+        f,c,w = windchill.CalculateWindChill(temperature, \
+            wind_speed)
+        return 'Windchill ' + userperfs.checkTemp(f)
     else:
-        CURRENT_WEATHER = 'Heat Index  ' + userperfs.checkTemp(heatindex)
+        return 'error'
 
-elif currentWeather.temperature >= 45 and currentWeather.temperature <= 77 or \
-        (currentWeather.temperature >= 45 and currentWeather.wind_speed < 3):
-    CURRENT_WEATHER = 'Temperature ' + userperfs.checkTemp(currentWeather.temperature)
+CURRENT_WEATHER = select_temperature_modifier(currentWeather.temperature, currentWeather.wind_speed)
 
-elif currentWeather.temperature > -45 and currentWeather.temperature < 45 and \
-    currentWeather.wind_speed >= 3:
-    import windchill
-    f,c,w = windchill.CalculateWindChill(currentWeather.temperature, \
-        currentWeather.wind_speed)
-    CURRENT_WEATHER = 'Windchill ' + userperfs.checkTemp(f)
-
-print (CURRENT_WEATHER)
 
 forecasts = nws.get_hourly_forecast()
-FORECASTED_WEATHER = ""
 for forecast in forecasts:
     #print (forecast.name + ': ' + forecast.detailed_forecast)
-    if forecast.is_daytime:
-        FORECASTED_WEATHER = "<p>" + forecast.name + ": " + forecast.short_forecast + ', with a high around ' + \
-            str(userperfs.checkTemp(forecast.temperature)) + "</p>"
-    else:
-        FORECASTED_WEATHER = "<p>" + forecast.name + ": " + forecast.short_forecast + ', with a low around ' + \
-            str(userperfs.checkTemp(forecast.temperature)) + "</p>"
+    forecast.feels_like = select_temperature_modifier(forecast.temperature, forecast.wind_speed)
     
 
 import json
@@ -85,6 +80,7 @@ for forecast in forecasts:
     condition = {}
     for item in vars(forecast):
         condition[item] = getattr(forecast, item)
+    condition['feels_like'] = forecast.feels_like
     conditions.append(condition)
 conditions.append(condition)
 forecast_json['conditions'] = conditions

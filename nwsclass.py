@@ -17,3 +17,4 @@ class Forecast:
         self.icon = current_data['icon']
         self.short_forecast = current_data['shortForecast']
         self.detailed_forecast = current_data['detailedForecast']
+        self.feels_like = ""
