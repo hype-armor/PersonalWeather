@@ -24,18 +24,18 @@ def select_temperature_modifier(temperature, wind_speed):
         nwswbgt = wbgt.WBGT(location.latitude, location.longitude)
         feelslike, heatindex = nwswbgt.update()
         if feelslike > heatindex:
-            return 'WBGT ' + userperfs.checkTemp(feelslike)
+            return userperfs.checkTemp(feelslike)
         else:
-            return 'Heat Index  ' + userperfs.checkTemp(heatindex)
+            return userperfs.checkTemp(heatindex)
     elif temperature >= 45 and temperature <= 77 or \
             (wind_speed < 3):
-        return 'Temperature ' + userperfs.checkTemp(temperature)
+        return userperfs.checkTemp(temperature)
     elif temperature > -45 and temperature < 45 and \
         wind_speed >= 3:
         import windchill
         f,c,w = windchill.CalculateWindChill(temperature, \
             wind_speed)
-        return 'Windchill ' + userperfs.checkTemp(f)
+        return userperfs.checkTemp(f)
     else:
         return 'error'
 
