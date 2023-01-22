@@ -1,9 +1,9 @@
 class UserPreferences:
     dictoftemps = {'Scorching': 90, 'Hot': 84, 'Warm': 78, 'Mild': 72, 'Cool': 65,
-                    'Chilly': 60, 'Cold': 50, 'Freezing': 50, 'Frostbite': 32}
+                    'Chilly': 60, 'Cold': 50, 'Really Cold': 45, 'Freezing': 39, 'Frostbite': 32}
 
     def __init__(self):
-        print("UserPreferences.__init__")
+        ""
 
     def getTemp(self, key):
         return self.dictoftemps[key]

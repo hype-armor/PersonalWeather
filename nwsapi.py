@@ -17,7 +17,7 @@ class NWS(object):
 
         # Make the API request with timeout set to 10 seconds
         response = requests.get(endpoint + self.lat + ',' + self.lng, timeout=10)
-        
+
         # Parse the JSON response
         self.json = response.json()
 
@@ -35,7 +35,7 @@ class NWS(object):
         return nwsclass.Forecast(current_data)
 
     def get_hourly_forecast(self):
-        # Get the forecast URL from the response
+        "Get the forecast URL from the response"
         forecast_url = self.json['properties']['forecast']
 
         # Make another API request to the forecast URL with timeout set to 10 seconds
@@ -45,9 +45,6 @@ class NWS(object):
         if forecast_response.status_code != 200:
             print('Error: ' + forecast_data['title'])
             return
-
-        # print today's forecast
-        print(forecast_data['properties']['periods'][0]['name'] + ': ' + forecast_data['properties']['periods'][0]['detailedForecast'])
 
         # create a list of forecasts
         forecasts = []
