@@ -18,7 +18,7 @@ var getJSON = function(url, callback) {
         document.getElementById("now_temperature").innerHTML = "Error!";
       } else {
         
-        //document.getElementById("now_icon").innerHTML = data.weather.current_conditions.icon;
+        document.getElementById("location_name").innerHTML = data.location.place_name;
         document.getElementById("now_temperature").innerHTML = data.weather.current_conditions.feels_like;
         //document.getElementById("now_temperature").innerHTML += data.weather.current_conditions.temperature_unit;
         document.getElementById("nowicon").src = data.weather.current_conditions.icon;

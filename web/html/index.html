@@ -1,20 +1,23 @@
 <html>
-
+<head>
+    <title>Greg's Magic Weather Service</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
 <body>
     <h1>
         Greg's Magic Weather Service
     </h1>
-
-    <table style="width:100%">
+    <h3 id="location_name"></h3>
+    <table style="width:90%">
         <tr>
             <th id="now_name">Now</th>
             <th id="1_name"></th>
             <th id="2_name"></th>
         </tr>
         <tr>
-            <td><img id="nowicon"></td>
-            <td><img id="1icon"></td>
-            <td><img id="2icon"></td>
+            <td><img id="nowicon" class="icon"></td>
+            <td><img id="1icon" class="icon"></td>
+            <td><img id="2icon" class="icon"></td>
         </tr>
         <tr>
             <td id="now_temperature"></td>
@@ -41,6 +44,7 @@
 
     </p>
     <script src="js/gmwa.js"></script>
+    
 </body>
 
 </html>

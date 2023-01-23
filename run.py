@@ -103,6 +103,10 @@ def hello_world():
 def send_js(path):
     return Response(open_file("web/js/"+path, "js"), mimetype='application/javascript')
 
+@app.route("/css/<path:path>")
+def send_css(path):
+    return Response(open_file("web/css/"+path, "css"), mimetype='text/css')
+
 @app.route("/api")
 def api():
     return Response(json_data, mimetype='application/json')
